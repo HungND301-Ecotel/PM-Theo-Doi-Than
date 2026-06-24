@@ -1,5 +1,4 @@
 import React, { useRef, useState } from "react";
-import { cn } from "@/lib/utils";
 import {
   Search,
   Filter,
@@ -32,6 +31,7 @@ import {
 } from "../../ui/dropdown-menu";
 import { Separator } from "../../ui/separator";
 import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
+import { cn } from "@/shared/utils/cn";
 
 export interface TableToolbarProps {
   searchValue?: string;

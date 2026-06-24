@@ -1,9 +1,14 @@
-import React, { useRef, useState, useEffect, useCallback } from 'react';
-import { ChevronLeft, ChevronRight } from "lucide-react"
-import { Button } from "../ui"
-import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "../ui/tooltip"
-import type { Tab } from './AppTabs';
-import TabDropdown from './TabDropdown';
+import React, { useRef, useState, useEffect, useCallback } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+  TooltipProvider,
+} from "../ui/tooltip";
+import type { Tab } from "./AppTabs";
+import TabDropdown from "./TabDropdown";
+import { Button } from "../ui/button";
 
 interface TabScrollProps {
   tabs: Tab[];
@@ -27,7 +32,8 @@ const TabScroll: React.FC<TabScrollProps> = ({
 
   const checkScroll = useCallback(() => {
     if (scrollContainerRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+      const { scrollLeft, scrollWidth, clientWidth } =
+        scrollContainerRef.current;
       setCanScrollLeft(scrollLeft > 0);
       setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
     }
@@ -37,19 +43,19 @@ const TabScroll: React.FC<TabScrollProps> = ({
     if (!scrollContainerRef.current) return;
 
     const container = scrollContainerRef.current;
-    const tabElements = container.querySelectorAll('[data-tab-id]');
+    const tabElements = container.querySelectorAll("[data-tab-id]");
     const visible: Tab[] = [];
 
     tabElements.forEach((el) => {
       const rect = el.getBoundingClientRect();
       const containerRect = container.getBoundingClientRect();
-      
+
       const isVisible =
         rect.left >= containerRect.left - 1 &&
         rect.right <= containerRect.right + 1;
 
       if (isVisible) {
-        const tabId = el.getAttribute('data-tab-id');
+        const tabId = el.getAttribute("data-tab-id");
         const tab = tabs.find((t) => t.id === tabId);
         if (tab) visible.push(tab);
       }
@@ -61,7 +67,7 @@ const TabScroll: React.FC<TabScrollProps> = ({
   useEffect(() => {
     checkScroll();
     const currentContainer = scrollContainerRef.current;
-    
+
     const resizeObserver = new ResizeObserver(() => {
       checkScroll();
       updateVisibleTabs();
@@ -69,20 +75,20 @@ const TabScroll: React.FC<TabScrollProps> = ({
 
     if (currentContainer) {
       resizeObserver.observe(currentContainer);
-      currentContainer.addEventListener('scroll', checkScroll);
+      currentContainer.addEventListener("scroll", checkScroll);
     }
 
     return () => {
       resizeObserver.disconnect();
       if (currentContainer) {
-        currentContainer.removeEventListener('scroll', checkScroll);
+        currentContainer.removeEventListener("scroll", checkScroll);
       }
     };
   }, [checkScroll, updateVisibleTabs, tabs]);
 
   useEffect(() => {
     const activeTabElement = scrollContainerRef.current?.querySelector(
-      `[data-tab-id="${activeTabId}"]`
+      `[data-tab-id="${activeTabId}"]`,
     );
 
     if (activeTabElement && scrollContainerRef.current) {
@@ -95,17 +101,21 @@ const TabScroll: React.FC<TabScrollProps> = ({
           container.scrollLeft + container.clientWidth;
 
       if (!isInView) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        element.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "center",
+        });
       }
     }
   }, [activeTabId]);
 
-  const scroll = (direction: 'left' | 'right') => {
+  const scroll = (direction: "left" | "right") => {
     if (scrollContainerRef.current) {
       const scrollAmount = 200;
       scrollContainerRef.current.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth',
+        left: direction === "left" ? -scrollAmount : scrollAmount,
+        behavior: "smooth",
       });
     }
   };
@@ -119,7 +129,7 @@ const TabScroll: React.FC<TabScrollProps> = ({
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => scroll('left')}
+                onClick={() => scroll("left")}
                 className="flex-shrink-0 h-8 w-8 p-0"
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -164,7 +174,7 @@ const TabScroll: React.FC<TabScrollProps> = ({
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => scroll('right')}
+                onClick={() => scroll("right")}
                 className="flex-shrink-0 h-8 w-8 p-0"
               >
                 <ChevronRight className="h-4 w-4" />

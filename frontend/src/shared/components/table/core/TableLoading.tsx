@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
+
+import { Table, TableBody, TableCell, TableRow, TableHeader } from "../../ui/table";
 import { Skeleton } from "../../ui/skeleton";
-import { Table, TableBody, TableCell, TableRow } from "../../ui/table";
 
 export interface TableLoadingProps {
   rows?: number;
@@ -28,7 +29,7 @@ const TableLoading: React.FC<TableLoadingProps> = ({
     <div className="w-full overflow-hidden">
       <Table>
         {showHeader && (
-          <TableBody>
+          <TableHeader>
             <TableRow className="hover:bg-transparent border-b">
               {Array.from({ length: columns }).map((_, colIndex) => (
                 <TableCell key={`header-${colIndex}`} className="py-3">
@@ -38,7 +39,7 @@ const TableLoading: React.FC<TableLoadingProps> = ({
                 </TableCell>
               ))}
             </TableRow>
-          </TableBody>
+          </TableHeader>
         )}
         <TableBody>
           {Array.from({ length: rows }).map((_, rowIndex) => (

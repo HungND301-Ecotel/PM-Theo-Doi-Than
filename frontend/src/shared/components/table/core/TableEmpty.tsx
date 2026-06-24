@@ -74,7 +74,7 @@ const TableEmpty: React.FC<TableEmptyProps> = ({
         {description || defaults.description}
       </p>
 
-      {(actionLabel || (type === "empty" && onAction)) && (
+      {onAction && (actionLabel || type === "empty") && (
         <Button onClick={onAction} className="gap-2 px-6 rounded-lg">
           <Plus className="h-4 w-4" />
           {actionLabel || "Thêm mới"}

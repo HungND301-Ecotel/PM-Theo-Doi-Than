@@ -1,20 +1,28 @@
-import React from 'react';
-import { MoreVertical, X } from "lucide-react"
-import { Button } from "../ui"
+import React from "react";
+import { MoreVertical, X } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu"
-import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "../ui/tooltip"
+} from "../ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+  TooltipProvider,
+} from "../ui/tooltip";
+import { Button } from "../ui/button";
 
 interface TabActionsProps {
   onCloseAll: () => void;
   onCloseOthers: () => void;
 }
 
-const TabActions: React.FC<TabActionsProps> = ({ onCloseAll, onCloseOthers }) => {
+const TabActions: React.FC<TabActionsProps> = ({
+  onCloseAll,
+  onCloseOthers,
+}) => {
   return (
     <div className="flex items-center">
       <DropdownMenu>
@@ -22,7 +30,11 @@ const TabActions: React.FC<TabActionsProps> = ({ onCloseAll, onCloseOthers }) =>
           <Tooltip delayDuration={0}>
             <TooltipTrigger asChild>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground mx-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-muted-foreground mx-1"
+                >
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>

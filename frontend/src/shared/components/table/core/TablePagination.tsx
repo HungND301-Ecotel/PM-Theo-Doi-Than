@@ -1,4 +1,3 @@
-
 import {
   ChevronLeft,
   ChevronRight,
@@ -6,14 +5,14 @@ import {
   ChevronsRight,
 } from "lucide-react";
 import type { Table } from "@tanstack/react-table";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/shared/components/ui/select";
+import { Button } from "../../ui/button";
 
 interface TablePaginationProps<TData> {
   table: Table<TData>;
@@ -32,9 +31,9 @@ function TablePagination<TData>({
   // Tổng bản ghi: ưu tiên totalCount (server) → fallback getFilteredRowModel (client)
   const total = totalCount ?? table.getFilteredRowModel().rows.length;
   const totalPages = table.getPageCount();
-
-  const startRow = pageIndex * pageSize + 1;
-  const endRow = Math.min((pageIndex + 1) * pageSize, total);
+  const hasRows = total > 0;
+  const startRow = hasRows ? pageIndex * pageSize + 1 : 0;
+  const endRow = hasRows ? Math.min((pageIndex + 1) * pageSize, total) : 0;
 
   return (
     <div className="flex items-center justify-between px-4 py-3 border-t bg-card rounded-b-lg">

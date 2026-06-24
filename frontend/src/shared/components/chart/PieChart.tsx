@@ -7,7 +7,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts'
-import { Card } from '../ui'
+import { Card, CardHeader, CardTitle, CardContent } from '@/shared/components/ui/card'
 
 export interface PieChartDataItem {
   name: string
@@ -44,8 +44,14 @@ const AppPieChart: React.FC<PieChartProps> = ({
   const actualInnerRadius = donut ? (innerRadius || '55%') : innerRadius
 
   return (
-    <Card title={title}>
-      <div className="w-full flex items-center justify-center" style={{ height }}>
+    <Card>
+      {title && (
+        <CardHeader>
+          <CardTitle>{title}</CardTitle>
+        </CardHeader>
+      )}
+      <CardContent>
+        <div className="w-full flex items-center justify-center" style={{ height }}>
         <ResponsiveContainer width="100%" height="100%">
           <RechartsPieChart margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
             <Pie
@@ -88,7 +94,8 @@ const AppPieChart: React.FC<PieChartProps> = ({
             )}
           </RechartsPieChart>
         </ResponsiveContainer>
-      </div>
+        </div>
+      </CardContent>
     </Card>
   )
 }

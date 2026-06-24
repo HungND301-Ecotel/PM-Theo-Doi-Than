@@ -1,5 +1,5 @@
 import React from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/utils/cn";
 import { ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 import {
   Table,
@@ -8,11 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "../../ui/table";
-import type {
-  PivotField,
-  PivotCell,
-  ConditionalRule,
-} from "./usePivotEngine";
+import type { PivotField, PivotCell, ConditionalRule } from "./usePivotEngine";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -68,7 +64,9 @@ const SortIndicator: React.FC<{
   sortDirection?: "asc" | "desc" | null;
 }> = ({ target, sortKey, sortDirection }) => {
   if (sortKey !== target || !sortDirection) {
-    return <ArrowUpDown className="inline ml-1 h-3 w-3 text-muted-foreground/40" />;
+    return (
+      <ArrowUpDown className="inline ml-1 h-3 w-3 text-muted-foreground/40" />
+    );
   }
   return sortDirection === "asc" ? (
     <ArrowUp className="inline ml-1 h-3 w-3 text-primary" />
@@ -124,7 +122,9 @@ const PivotGrid: React.FC<PivotGridProps> = ({
         key={`${rowKey}-${colKey}-${fieldIndex}`}
         className={cn(
           "text-right font-mono text-xs px-3 py-2 transition-all duration-200",
-          onCellClick && !isTotal && "cursor-pointer hover:bg-primary/10 hover:shadow-inner",
+          onCellClick &&
+            !isTotal &&
+            "cursor-pointer hover:bg-primary/10 hover:shadow-inner",
           isTotal && "font-bold bg-muted/30",
           condProps.className,
         )}
@@ -242,7 +242,8 @@ const PivotGrid: React.FC<PivotGridProps> = ({
                   className={cn(
                     "text-right font-semibold whitespace-nowrap",
                     isMultiValue && vi === 0 && "border-l",
-                    onSort && "cursor-pointer select-none hover:text-foreground",
+                    onSort &&
+                      "cursor-pointer select-none hover:text-foreground",
                   )}
                   onClick={onSort ? () => onSort(vf.key) : undefined}
                 >
@@ -279,7 +280,10 @@ const PivotGrid: React.FC<PivotGridProps> = ({
         <TableBody>
           {/* Data rows */}
           {rowKeys.map((rk) => (
-            <TableRow key={rk} className="hover:bg-primary/5 transition-colors group">
+            <TableRow
+              key={rk}
+              className="hover:bg-primary/5 transition-colors group"
+            >
               <TableCell className="font-semibold border-r sticky left-0 bg-card group-hover:bg-primary/5 transition-colors z-20 whitespace-nowrap shadow-[1px_0_0_0_rgba(0,0,0,0.05)]">
                 {rk}
               </TableCell>

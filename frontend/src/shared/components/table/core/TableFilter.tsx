@@ -7,9 +7,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../ui/select";
+import { Input } from "../../ui/input";
+import { Button } from "../../ui/button";
 import { Badge } from "../../ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 
 export interface FilterField {
   key: string;

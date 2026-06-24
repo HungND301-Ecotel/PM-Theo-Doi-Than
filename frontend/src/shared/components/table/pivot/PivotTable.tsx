@@ -1,5 +1,4 @@
-import React, { useState, useCallback } from "react";
-import { cn } from "@/lib/utils";
+import React, { useState, useCallback, useMemo } from "react";
 import { Table as TableIcon, Download } from "lucide-react";
 import TableToolbar from "../core/TableToolbar";
 import TableLoading from "../core/TableLoading";
@@ -14,6 +13,7 @@ import {
   type AggregationType,
   type ConditionalRule,
 } from "./usePivotEngine";
+import {cn} from "@/shared/utils/cn.ts";
 
 // ─── Re-exports ───────────────────────────────────────────────────────────────
 
@@ -127,38 +127,57 @@ const PivotTable: React.FC<PivotTableProps> = ({
   const [localColKeys, setLocalColKeys] = useState<string[]>([columnField.key]);
 
   // Resolve value fields: prefer valueFields (array) over valueField (single)
-  const initialValueFields = valueFieldsProp ?? (valueField ? [valueField] : []);
-  const [localValueKeys, setLocalValueKeys] = useState<string[]>(
+  const initialValueFields = useMemo(() => {
+    return valueFieldsProp ?? (valueField ? [valueField] : []);
+  }, [valueFieldsProp, valueField]);
+
+  const [localValueKeys, setLocalValueKeys] = useState<string[]>(() =>
     initialValueFields.map((f) => f.key),
   );
   const [localAgg, setLocalAgg] = useState<AggregationType>(aggregationProp);
 
   // Resolve active fields from keys
-  const allFields = [
+  const allFields = useMemo(() => [
     ...(availableRowFields ?? [rowField]),
     ...(availableColumnFields ?? [columnField]),
     ...(availableValueFields ?? initialValueFields),
-  ];
+  ], [availableRowFields, rowField, availableColumnFields, columnField, availableValueFields, initialValueFields]);
 
-  const resolveField = (key: string, fallback: PivotField): PivotField =>
-    allFields.find((f) => f.key === key) ?? fallback;
+  const resolveField = useCallback((key: string, fallback: PivotField): PivotField =>
+    allFields.find((f) => f.key === key) ?? fallback,
+    [allFields]
+  );
 
-  const activeRowFields = localRowKeys
-    .map((k) => resolveField(k, rowField))
-    .filter(Boolean);
-  const activeColFields = localColKeys
-    .map((k) => resolveField(k, columnField))
-    .filter(Boolean);
-  const activeValueFields = localValueKeys
-    .map((k) => resolveField(k, initialValueFields[0]))
-    .filter(Boolean);
+  const activeRowFields = useMemo(() => {
+    return localRowKeys
+      .map((k) => resolveField(k, rowField))
+      .filter(Boolean);
+  }, [localRowKeys, resolveField, rowField]);
+
+  const activeColFields = useMemo(() => {
+    return localColKeys
+      .map((k) => resolveField(k, columnField))
+      .filter(Boolean);
+  }, [localColKeys, resolveField, columnField]);
+
+  const activeValueFields = useMemo(() => {
+    return localValueKeys
+      .map((k) => resolveField(k, initialValueFields[0]))
+      .filter(Boolean);
+  }, [localValueKeys, resolveField, initialValueFields]);
+
+  const activeValueFieldsOrFallback = useMemo(() => {
+    return activeValueFields.length > 0
+      ? activeValueFields
+      : [{ key: "value", label: "Value" }];
+  }, [activeValueFields]);
 
   // ── Pivot Engine ────────────────────────────────────────────────────────
   const engine = usePivotEngine({
     data,
     rowFields: activeRowFields,
     columnFields: activeColFields,
-    valueFields: activeValueFields.length > 0 ? activeValueFields : [{ key: "value", label: "Value" }],
+    valueFields: activeValueFieldsOrFallback,
     aggregation: localAgg,
   });
 
@@ -186,7 +205,9 @@ const PivotTable: React.FC<PivotTableProps> = ({
     }
 
     const csv = engine.exportCsv();
-    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const blob = new Blob(["\uFEFF" + csv], {
+      type: "text/csv;charset=utf-8;",
+    });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
@@ -270,7 +291,9 @@ const PivotTable: React.FC<PivotTableProps> = ({
       {loading && (
         <TableLoading
           rows={6}
-          columns={(engine.columnKeys.length || 3) * activeValueFields.length + 2}
+          columns={
+            (engine.columnKeys.length || 3) * activeValueFields.length + 2
+          }
         />
       )}
 
@@ -304,9 +327,7 @@ const PivotTable: React.FC<PivotTableProps> = ({
       {enableDrilldown && (
         <PivotDrilldown
           open={drilldown.open}
-          onOpenChange={(open) =>
-            setDrilldown((prev) => ({ ...prev, open }))
-          }
+          onOpenChange={(open) => setDrilldown((prev) => ({ ...prev, open }))}
           rowKey={drilldown.rowKey}
           colKey={drilldown.colKey}
           cell={drilldown.cell}

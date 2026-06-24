@@ -9,7 +9,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts'
-import { Card } from '../ui'
+import { Card, CardHeader, CardTitle, CardContent } from "@/shared/components/ui/card.tsx";
 
 export interface LineChartDataItem {
   name: string
@@ -60,8 +60,14 @@ const AppLineChart: React.FC<LineChartProps> = ({
   const mutedColor = 'var(--muted-foreground)'
 
   return (
-    <Card title={title}>
-      <div className="w-full" style={{ height }}>
+    <Card>
+      {title && (
+        <CardHeader>
+          <CardTitle>{title}</CardTitle>
+        </CardHeader>
+      )}
+      <CardContent>
+        <div className="w-full" style={{ height }}>
         <ResponsiveContainer width="100%" height="100%">
           <RechartsLineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
             {showGrid && <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />}
@@ -117,7 +123,8 @@ const AppLineChart: React.FC<LineChartProps> = ({
             })}
           </RechartsLineChart>
         </ResponsiveContainer>
-      </div>
+        </div>
+      </CardContent>
     </Card>
   )
 }

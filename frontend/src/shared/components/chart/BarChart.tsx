@@ -9,7 +9,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { Card } from "../ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
 
 export interface BarChartDataItem {
   name: string;
@@ -71,8 +71,14 @@ const AppBarChart: React.FC<BarChartProps> = ({
   const mutedColor = "var(--muted-foreground)";
 
   return (
-    <Card title={title}>
-      <div className="w-full" style={{ height }}>
+    <Card>
+      {title && (
+        <CardHeader>
+          <CardTitle>{title}</CardTitle>
+        </CardHeader>
+      )}
+      <CardContent>
+        <div className="w-full" style={{ height }}>
         <ResponsiveContainer width="100%" height="100%">
           <RechartsBarChart
             data={data}
@@ -171,7 +177,8 @@ const AppBarChart: React.FC<BarChartProps> = ({
             ))}
           </RechartsBarChart>
         </ResponsiveContainer>
-      </div>
+        </div>
+      </CardContent>
     </Card>
   );
 };

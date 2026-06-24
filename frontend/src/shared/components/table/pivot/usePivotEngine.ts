@@ -142,8 +142,13 @@ export function usePivotEngine({
   sortBy: initialSortBy,
 }: UsePivotEngineOptions): UsePivotEngineReturn {
   // Resolve arrays — prefer arrays, fall back to single field wrapped in array
-  const rowFields = rowFieldsProp ?? (rowField ? [rowField] : []);
-  const columnFields = columnFieldsProp ?? (columnField ? [columnField] : []);
+  const rowFields = useMemo(() => {
+    return rowFieldsProp ?? (rowField ? [rowField] : []);
+  }, [rowFieldsProp, rowField]);
+
+  const columnFields = useMemo(() => {
+    return columnFieldsProp ?? (columnField ? [columnField] : []);
+  }, [columnFieldsProp, columnField]);
   // Sort state
   const [sortKey, setSortKey] = useState<string | null>(
     initialSortBy?.field ?? null,
@@ -175,7 +180,10 @@ export function usePivotEngine({
     // Intermediate: [row][col] → array of raw values per value field
     const rawMatrix: Record<
       string,
-      Record<string, { valuesPerField: number[][]; rawRows: Record<string, unknown>[] }>
+      Record<
+        string,
+        { valuesPerField: number[][]; rawRows: Record<string, unknown>[] }
+      >
     > = {};
 
     for (const row of data) {
@@ -229,7 +237,8 @@ export function usePivotEngine({
       rowTotals[rk] = {
         values: rowTotalValuesPerField.map((arr) =>
           aggregation === "avg"
-            ? arr.reduce((a, b) => a + b, 0) / (arr.filter(v => v !== 0).length || 1)
+            ? arr.reduce((a, b) => a + b, 0) /
+              (arr.filter((v) => v !== 0).length || 1)
             : arr.reduce((a, b) => a + b, 0),
         ),
         rawRows: rowTotalRawRows,
@@ -242,7 +251,8 @@ export function usePivotEngine({
       const colValues: number[] = valueFields.map((_, i) => {
         const vals = rowKeys.map((rk) => matrix[rk][ck].values[i]);
         return aggregation === "avg"
-          ? vals.reduce((a, b) => a + b, 0) / (vals.filter(v => v !== 0).length || 1)
+          ? vals.reduce((a, b) => a + b, 0) /
+              (vals.filter((v) => v !== 0).length || 1)
           : vals.reduce((a, b) => a + b, 0);
       });
 
@@ -258,7 +268,8 @@ export function usePivotEngine({
       values: valueFields.map((_, i) => {
         const allVals = rowKeys.map((rk) => rowTotals[rk].values[i]);
         return aggregation === "avg"
-          ? allVals.reduce((a, b) => a + b, 0) / (allVals.filter(v => v !== 0).length || 1)
+          ? allVals.reduce((a, b) => a + b, 0) /
+              (allVals.filter((v) => v !== 0).length || 1)
           : allVals.reduce((a, b) => a + b, 0);
       }),
       rawRows: data as Record<string, unknown>[],
@@ -288,7 +299,15 @@ export function usePivotEngine({
     }
 
     return { rowKeys, columnKeys, matrix, rowTotals, columnTotals, grandTotal };
-  }, [data, rowFields, columnFields, valueFields, aggregation, sortKey, sortDirection]);
+  }, [
+    data,
+    rowFields,
+    columnFields,
+    valueFields,
+    aggregation,
+    sortKey,
+    sortDirection,
+  ]);
 
   // CSV Export
   const exportCsv = useCallback((): string => {

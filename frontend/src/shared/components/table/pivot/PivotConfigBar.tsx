@@ -7,14 +7,10 @@ import {
   SelectValue,
 } from "../../ui/select";
 import { Label } from "../../ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "../../ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
 import { ChevronDown, Check } from "lucide-react";
-import { cn } from "@/lib/utils";
 import type { PivotField, AggregationType } from "./usePivotEngine";
+import {cn} from "@/shared/utils/cn.ts";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -47,7 +43,13 @@ interface MultiFieldSelectProps {
   onChange: (keys: string[]) => void;
 }
 
-function MultiFieldSelect({ label, dotColor, selectedKeys, fields, onChange }: MultiFieldSelectProps) {
+function MultiFieldSelect({
+  label,
+  dotColor,
+  selectedKeys,
+  fields,
+  onChange,
+}: MultiFieldSelectProps) {
   const toggleField = (key: string) => {
     if (selectedKeys.includes(key)) {
       // Don't allow removing the last field
@@ -115,7 +117,9 @@ function MultiFieldSelect({ label, dotColor, selectedKeys, fields, onChange }: M
                         : "border-muted-foreground/40",
                     )}
                   >
-                    {isSelected && <Check className="w-3 h-3 text-primary-foreground" />}
+                    {isSelected && (
+                      <Check className="w-3 h-3 text-primary-foreground" />
+                    )}
                   </div>
                   {f.label}
                 </button>
@@ -196,10 +200,11 @@ const PivotConfigBar: React.FC<PivotConfigBarProps> = ({
                 <button
                   key={f.key}
                   onClick={() => toggleValueField(f.key)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 border ${isActive
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 border ${
+                    isActive
                       ? "bg-primary text-primary-foreground border-primary shadow-md shadow-primary/20"
                       : "bg-background text-muted-foreground border-input hover:bg-muted/50 hover:border-border"
-                    }`}
+                  }`}
                 >
                   {f.label}
                 </button>
