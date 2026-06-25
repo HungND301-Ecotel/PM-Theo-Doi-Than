@@ -76,6 +76,10 @@ jobs:
           port: ${{ secrets.STAGING_PORT }}
           script: |
             mkdir -p /home/${{ secrets.STAGING_USER }}/coal-tracking/deployment/staging
+            # Volume dirs for bind-mount (staging-docker-compose.yml)
+            mkdir -p /mnt/hdd/pmtdt_postgres_data
+            mkdir -p /mnt/hdd/pmtdt_pgadmin_data
+            mkdir -p /mnt/hdd/pmtdt_redis_data
 
       - name: Transfer deployment files to VPS
         uses: appleboy/scp-action@v0.1.4

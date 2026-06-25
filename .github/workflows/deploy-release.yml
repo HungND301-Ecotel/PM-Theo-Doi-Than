@@ -19,7 +19,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Copy init-db.sql into staging
-        run: cp backend/init-db.sql deployment/staging/init-db.sql
+        run: cp backend/init-db.sql deployment/release/init-db.sql
       # ============ FRONTEND ENV ============
       - name: Create .env for frontend
         run: |
