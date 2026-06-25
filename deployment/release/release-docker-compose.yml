@@ -99,6 +99,7 @@ services:
       - frontnet
       - backnet
     depends_on:
+      - frontend-service
       - master-data-service
     logging:
       driver: json-file

@@ -8,19 +8,22 @@
 ####
 
 # ============ REGISTRY ============
-REGISTRY=ecoteldev
 DOCKER_REGISTRY ?= ecoteldev
-IMAGE_TAG ?= staging-${TAG_VERSION}-${commit_id}
 
 # ============ VERSIONS ============
 RELEASE_VERSION=release
 STAGING_VERSION=staging
 TEST_VERSION=test
-TAG_VERSION=$(shell git describe --tags --abbrev=0)
+TAG_VERSION=$(shell git describe --tags --abbrev=0 2>/dev/null || echo "0.0.0")
 
 # ============ GIT INFO ============
-current_branch=$(shell git branch --show-current)
-commit_id=$(shell git rev-parse --short=7 HEAD)
+current_branch=$(shell git branch --show-current 2>/dev/null || echo "unknown")
+commit_id=$(shell git rev-parse --short=7 HEAD 2>/dev/null || echo "unknown")
+
+# Target-specific defaults for IMAGE_TAG if not provided by environment
+test: IMAGE_TAG ?= ${TEST_VERSION}-${TAG_VERSION}-${commit_id}
+staging: IMAGE_TAG ?= ${STAGING_VERSION}-${TAG_VERSION}-${commit_id}
+release: IMAGE_TAG ?= ${RELEASE_VERSION}-${TAG_VERSION}-${commit_id}
 
 # ============ LOCAL DEV ============
 up: clean build
@@ -38,8 +41,8 @@ clean:
 
 # ============ TEST ============
 test:
-	@echo "DOCKER_REGISTRY=${REGISTRY}" > .env
-	@echo "IMAGE_TAG=${TEST_VERSION}-${TAG_VERSION}-${commit_id}" >> .env
+	@echo "DOCKER_REGISTRY=${DOCKER_REGISTRY}" > .env
+	@echo "IMAGE_TAG=${IMAGE_TAG}" >> .env
 	@echo "Building images for test..."
 	docker compose -f docker-compose-build-test.yml build \
 		--parallel \
@@ -51,8 +54,8 @@ test:
 
 # ============ STAGING ============
 staging:
-	@echo "DOCKER_REGISTRY=${REGISTRY}" > .env
-	@echo "IMAGE_TAG=${STAGING_VERSION}-${TAG_VERSION}-${commit_id}" >> .env
+	@echo "DOCKER_REGISTRY=${DOCKER_REGISTRY}" > .env
+	@echo "IMAGE_TAG=${IMAGE_TAG}" >> .env
 	@echo "Building images for staging..."
 	docker compose -f docker-compose-build.yml build \
 		--parallel \
@@ -64,8 +67,8 @@ staging:
 
 # ============ RELEASE ============
 release:
-	@echo "DOCKER_REGISTRY=${REGISTRY}" > .env
-	@echo "IMAGE_TAG=${RELEASE_VERSION}-${TAG_VERSION}-${commit_id}" >> .env
+	@echo "DOCKER_REGISTRY=${DOCKER_REGISTRY}" > .env
+	@echo "IMAGE_TAG=${IMAGE_TAG}" >> .env
 	@echo "Building images for release..."
 	docker compose -f docker-compose-build.yml build \
 		--parallel \
