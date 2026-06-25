@@ -1,0 +1,110 @@
+name: Deploy Staging — Coal Tracking System
+
+on:
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+jobs:
+  deploy-staging:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Copy init-db.sql into staging
+        run: cp backend/init-db.sql deployment/staging/init-db.sql
+      # ============ FRONTEND ENV ============
+      - name: Create .env for frontend
+        run: |
+          cat > ./frontend/.env << EOF
+          VITE_BASE_API=${{ secrets.VITE_BASE_API }}
+          VITE_SOCKET_API=${{ secrets.VITE_SOCKET_API }}
+          EOF
+
+      # ============ BUILD & PUSH IMAGES ============
+      - name: Build and push Docker images
+        env:
+          DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+          DOCKER_HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: make staging
+
+      # ============ BACKEND ENV ============
+      - name: Create .env for staging deployment
+        run: |
+          cat > ./deployment/staging/.env << EOF
+          COMPOSE_PROJECT_NAME=coal-tracking-staging
+          DOCKER_REGISTRY=${{ secrets.DOCKER_REGISTRY }}
+          IMAGE_TAG=${{ github.sha }}
+
+          # PostgreSQL
+          POSTGRES_USER=${{ secrets.STAGING_POSTGRES_USER }}
+          POSTGRES_PASSWORD=${{ secrets.STAGING_POSTGRES_PASSWORD }}
+
+          # Redis
+          REDIS_PASSWORD=${{ secrets.STAGING_REDIS_PASSWORD }}
+
+          # PgAdmin
+          PGADMIN_EMAIL=${{ secrets.PGADMIN_EMAIL }}
+          PGADMIN_PASSWORD=${{ secrets.PGADMIN_PASSWORD }}
+
+          # Master Data Service
+          MASTER_DATA_PORT=${{ secrets.MASTER_DATA_PORT }}
+          MASTER_DATA_DB_URL=${{ secrets.STAGING_MASTER_DATA_DB_URL }}
+          MASTER_DATA_DB_USERNAME=${{ secrets.STAGING_MASTER_DATA_DB_USERNAME }}
+          MASTER_DATA_DB_PASSWORD=${{ secrets.STAGING_MASTER_DATA_DB_PASSWORD }}
+
+          # Order Service
+          ORDER_SERVICE_PORT=${{ secrets.ORDER_SERVICE_PORT }}
+          ORDER_DB_URL=${{ secrets.STAGING_ORDER_DB_URL }}
+          ORDER_DB_USERNAME=${{ secrets.STAGING_ORDER_DB_USERNAME }}
+          ORDER_DB_PASSWORD=${{ secrets.STAGING_ORDER_DB_PASSWORD }}
+
+          # Portal
+          PORTAL_JWKS_URI=${{ secrets.PORTAL_JWKS_URI }}
+          EOF
+
+      # ============ TRANSFER FILES ============
+      - name: Ensure target directory exists on VPS
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          port: ${{ secrets.STAGING_PORT }}
+          script: |
+            mkdir -p /home/${{ secrets.STAGING_USER }}/coal-tracking/deployment/staging
+
+      - name: Transfer deployment files to VPS
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          port: ${{ secrets.STAGING_PORT }}
+          source: "deployment/staging/*"
+          target: "/home/${{ secrets.STAGING_USER }}/coal-tracking/deployment/staging"
+          strip_components: 2
+
+      # ============ DEPLOY ============
+      - name: Deploy to Staging
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          port: ${{ secrets.STAGING_PORT }}
+          script: |
+            cd /home/${{ secrets.STAGING_USER }}/coal-tracking/deployment/staging
+            pwd && ls -al
+            docker image prune -f
+            docker compose -f staging-docker-compose.yml down --remove-orphans
+            chmod +x start-app.sh
+            ./start-app.sh

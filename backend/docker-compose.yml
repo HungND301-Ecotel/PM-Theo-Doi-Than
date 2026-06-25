@@ -1,0 +1,84 @@
+services:
+
+  # ============ INFRASTRUCTURE ============
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@admin.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============ SERVICES ============
+  master-data-service:
+    build:
+      context: .
+      dockerfile: master-data-service/Dockerfile
+    ports:
+      - "${MASTER_DATA_PORT:-8081}:8081"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SERVER_PORT: ${MASTER_DATA_PORT}
+      SPRING_DATASOURCE_URL: ${MASTER_DATA_DB_URL}
+      SPRING_DATASOURCE_USERNAME: ${MASTER_DATA_DB_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${MASTER_DATA_DB_PASSWORD}
+
+      PORTAL_JWKS_URI: ${PORTAL_JWKS_URI}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+#  order-service:
+#    build:
+#      context: .
+#      dockerfile: master-data-service/Dockerfile
+#    ports:
+#      - "${ORDER_SERVICE_PORT:-8082}:8082"
+#    environment:
+#      SPRING_PROFILES_ACTIVE: prod
+#
+#      SPRING_DATASOURCE_URL: ${ORDER_DB_URL}
+#      SPRING_DATASOURCE_USERNAME: ${ORDER_DB_USERNAME}
+#      SPRING_DATASOURCE_PASSWORD: ${ORDER_DB_PASSWORD}
+#
+#      PORTAL_JWKS_URI: ${PORTAL_JWKS_URI}
+#    depends_on:
+#      postgres:
+#        condition: service_healthy
+#    restart: "no"
+
+volumes:
+  postgres_data:
+  pgadmin_data:
