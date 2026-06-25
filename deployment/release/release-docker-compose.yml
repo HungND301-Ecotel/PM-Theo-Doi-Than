@@ -59,7 +59,7 @@ services:
       - backnet
 
     # ============ FRONTEND ============
-  frontend-serivce:
+  frontend-service:
     image: ${DOCKER_REGISTRY}/pmtdt-frontend-img:${IMAGE_TAG}
     # target: development
     stdin_open: true
@@ -108,8 +108,8 @@ services:
         max-file: "30"
 
 networks:
-  - frontnet
-  - backnet
+  frontnet:
+  backnet:
 
 volumes:
   postgres_data:

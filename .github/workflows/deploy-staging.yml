@@ -30,7 +30,6 @@ jobs:
       # ============ BUILD & PUSH IMAGES ============
       - name: Build and push Docker images
         env:
-          DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
           DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
           DOCKER_HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
           IMAGE_TAG: ${{ github.sha }}
@@ -41,15 +40,11 @@ jobs:
         run: |
           cat > ./deployment/staging/.env << EOF
           COMPOSE_PROJECT_NAME=coal-tracking-staging
-          DOCKER_REGISTRY=${{ secrets.DOCKER_REGISTRY }}
           IMAGE_TAG=${{ github.sha }}
 
           # PostgreSQL
           POSTGRES_USER=${{ secrets.STAGING_POSTGRES_USER }}
           POSTGRES_PASSWORD=${{ secrets.STAGING_POSTGRES_PASSWORD }}
-
-          # Redis
-          REDIS_PASSWORD=${{ secrets.STAGING_REDIS_PASSWORD }}
 
           # PgAdmin
           PGADMIN_EMAIL=${{ secrets.PGADMIN_EMAIL }}
