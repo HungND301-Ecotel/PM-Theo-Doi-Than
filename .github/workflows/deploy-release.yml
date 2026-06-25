@@ -36,11 +36,18 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
         run: make release
 
+      # READ DOCKER_REGISTRY from .env by Makefile
+      - name: Read DOCKER_REGISTRY from .env
+        run: |
+          source .env
+          echo "DOCKER_REGISTRY=$DOCKER_REGISTRY" >> $GITHUB_ENV
+
       # ============ BACKEND ENV ============
       - name: Create .env for release deployment
         run: |
           cat > ./deployment/release/.env << EOF
           COMPOSE_PROJECT_NAME=coal-tracking-prod
+          DOCKER_REGISTRY=${{ env.DOCKER_REGISTRY }}
           IMAGE_TAG=${{ github.sha }}
 
           # PostgreSQL

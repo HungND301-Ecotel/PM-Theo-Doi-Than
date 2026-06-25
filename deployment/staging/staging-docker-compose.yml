@@ -78,7 +78,7 @@ services:
       - frontnet
   master-data-service:
     env_file:
-      - .env_backend
+      - .env
     image: ${DOCKER_REGISTRY}/pmtdt-master-data-service:${IMAGE_TAG:-latest}
     environment:
       SPRING_PROFILES_ACTIVE: prod
