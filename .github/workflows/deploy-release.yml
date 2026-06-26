@@ -107,12 +107,3 @@ jobs:
             docker compose -f release-docker-compose.yml down --remove-orphans
             chmod +x start-app.sh
             ./start-app.sh
-
-      # ============ NOTIFY ============
-      - name: Notify deployment successed
-        if: success()
-        run: echo "Deploy production successed - image: ${{ github.sha }}"
-
-      - name: Notify deployment failed
-        if: failure()
-        run: echo "Deploy production failed - check logs"

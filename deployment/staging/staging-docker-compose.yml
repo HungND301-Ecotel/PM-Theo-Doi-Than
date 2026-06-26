@@ -49,7 +49,7 @@ services:
     image: ${DOCKER_REGISTRY}/pmtdt-reverse-proxy-img:${IMAGE_TAG:-latest}
     ports:
       # HOST_PORT:CONTAINER_PORT
-      - "7777:8888"
+      - "2526:8888"
     stdin_open: true
     environment:
       - TZ=Asia/Ho_Chi_Minh
@@ -66,7 +66,7 @@ services:
       # target: development
     ports:
       # HOST_PORT:CONTAINER_PORT
-      - "9999:80"
+      - "2527:80"
     stdin_open: true
     environment:
       - TZ=Asia/Ho_Chi_Minh
