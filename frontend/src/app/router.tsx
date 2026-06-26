@@ -1,62 +1,129 @@
-import { lazy, Suspense } from "react"
-import { createBrowserRouter, RouterProvider, Link, Outlet } from "react-router-dom"
+import { lazy, Suspense } from 'react';
+import {
+  createBrowserRouter,
+  RouterProvider,
+  Navigate,
+  Outlet,
+} from 'react-router-dom';
+import { useAuthStore } from '@/modules/auth';
+import { ROUTES } from '@/shared/constants/routes';
+import { MainLayout } from '@/layouts/MainLayout';
+import { PageLoader } from '@/shared/components/loading/PageLoader';
 
-// Lazy-loaded pages
-const DashboardPage = lazy(() => import("@/pages/DashboardPage"))
-const ReceiptListPage = lazy(() => import("@/pages/ReceiptListPage"))
+// ─── Lazy-loaded pages ────────────────────────────────────────────────────────
+const LoginPage = lazy(() => import('@/modules/auth/pages/LoginPage'));
+const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
+const DashboardPage = lazy(() => import('@/pages/DashboardPage'));
+const ReceiptListPage = lazy(() => import('@/pages/ReceiptListPage'));
 
-// Main layout component
-function MainLayout() {
-  return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground">
-      {/* Header / Navbar */}
-      <header className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <span className="text-xl font-bold tracking-tight text-primary">PM Theo Dõi Than</span>
-            <nav className="flex items-center gap-4 text-sm font-medium">
-              <Link to="/" className="hover:text-primary transition-colors">Tổng Quan</Link>
-              <Link to="/receipts" className="hover:text-primary transition-colors">Nhập Than</Link>
-            </nav>
-          </div>
-          <div className="text-sm text-muted-foreground">Admin Portal</div>
-        </div>
-      </header>
-
-      {/* Main Content Area */}
-      <main className="flex-1 container mx-auto px-4 py-6">
-        <Suspense fallback={<div className="p-6">Đang tải...</div>}>
-          <Outlet />
-        </Suspense>
-      </main>
-
-      {/* Footer */}
-      <footer className="border-t border-border py-4 bg-muted/40">
-        <div className="container mx-auto px-4 text-center text-xs text-muted-foreground">
-          &copy; {new Date().getFullYear()} PM Theo Dõi Than. All rights reserved.
-        </div>
-      </footer>
-    </div>
-  )
+// ─── Utils ───────────────────────────────────────────────────────────────────
+function isTokenExpired(token: string): boolean {
+  try {
+    const payload = token.split('.')[1];
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
+    const { exp } = JSON.parse(atob(padded)) as { exp?: number };
+    return typeof exp !== 'number' || Date.now() >= exp * 1000;
+  } catch {
+    return true;
+  }
 }
 
+// ─── PrivateRoute ─────────────────────────────────────────────────────────────
+function PrivateRoute() {
+  // TODO: xóa dòng này khi BE ready
+  const DEV_BYPASS = import.meta.env.DEV;
+  if (DEV_BYPASS) return <Outlet />;
+
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated());
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const clearAuth = useAuthStore((state) => state.clearAuth);
+
+  if (accessToken && isTokenExpired(accessToken)) {
+    clearAuth();
+    return <Navigate to={ROUTES.AUTH.LOGIN} replace />;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to={ROUTES.AUTH.LOGIN} replace />;
+  }
+
+  return <Outlet />;
+}
+
+// ─── PublicOnlyRoute ──────────────────────────────────────────────────────────
+function PublicOnlyRoute() {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated());
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const clearAuth = useAuthStore((state) => state.clearAuth);
+
+  if (accessToken && isTokenExpired(accessToken)) {
+    clearAuth();
+    return <Outlet />;
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to={ROUTES.DASHBOARD} replace />;
+  }
+
+  return <Outlet />;
+}
+
+// ─── Router config ────────────────────────────────────────────────────────────
 const router = createBrowserRouter([
+  // Public only routes (đã login → không vào được)
   {
-    path: "/",
-    element: <MainLayout />,
+    element: <PublicOnlyRoute />,
     children: [
       {
-        index: true,
-        element: <DashboardPage />,
-      },
-      {
-        path: "receipts",
-        element: <ReceiptListPage />,
+        path: ROUTES.AUTH.LOGIN,
+        element: (
+          <Suspense fallback={<PageLoader fullscreen />}>
+            <LoginPage />
+          </Suspense>
+        ),
       },
     ],
   },
-])
+
+  // Static public routes
+  {
+    path: ROUTES.NOT_FOUND,
+    element: (
+      <Suspense fallback={<PageLoader fullscreen />}>
+        <NotFoundPage />
+      </Suspense>
+    ),
+  },
+
+  // Private routes
+  {
+    element: <PrivateRoute />,
+    children: [
+      {
+        path: ROUTES.DASHBOARD,
+        element: <MainLayout />,
+        children: [
+          {
+            index: true,
+            element: <DashboardPage />,
+          },
+          {
+            path: 'receipts',
+            element: <ReceiptListPage />,
+          },
+        ],
+      },
+    ],
+  },
+
+  // Fallback
+  {
+    path: '*',
+    element: <Navigate to={ROUTES.NOT_FOUND} replace />,
+  },
+]);
 
 export function AppRouter() {
-  return <RouterProvider router={router} />
+  return <RouterProvider router={router} />;
 }

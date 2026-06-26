@@ -1,37 +1,42 @@
-import axios from "axios"
+import axios from 'axios';
+import { useAuthStore } from '@/modules/auth/stores/auth.store';
+
+const rawBaseUrl = import.meta.env.VITE_API_BASE_URL;
+
+if (!rawBaseUrl && import.meta.env.PROD) {
+  throw new Error(
+    '[Config Error] VITE_API_BASE_URL is not defined. ' +
+      'Set this environment variable before building for production.'
+  );
+}
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "/api",
+  baseURL: rawBaseUrl ?? 'http://localhost:3000',
   timeout: 10000,
   headers: {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
   },
-})
+});
 
-// Request interceptor for API calls
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token")
+    const token = useAuthStore.getState().accessToken;
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+      config.headers.Authorization = `Bearer ${token}`;
     }
-    return config
+    return config;
   },
-  (error) => {
-    return Promise.reject(error)
-  }
-)
+  (error) => Promise.reject(error)
+);
 
-// Response interceptor for API calls
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response?.status === 401) {
-      // Handle unauthorized (e.g. redirect to login, clear token)
-      localStorage.removeItem("token")
+      useAuthStore.getState().clearAuth();
     }
-    return Promise.reject(error)
+    return Promise.reject(error);
   }
-)
+);
 
-export default api
+export default api;
