@@ -1,6 +1,7 @@
-import React from "react"
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { TooltipProvider } from "@/shared/components/ui/tooltip"
+import React from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { TooltipProvider } from '@/shared/components/ui/tooltip';
+import { Toaster } from 'sonner';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -9,10 +10,10 @@ const queryClient = new QueryClient({
       retry: false,
     },
   },
-})
+});
 
 interface ProvidersProps {
-  children: React.ReactNode
+  children: React.ReactNode;
 }
 
 export function Providers({ children }: ProvidersProps) {
@@ -20,7 +21,8 @@ export function Providers({ children }: ProvidersProps) {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         {children}
+        <Toaster position='top-right' richColors />
       </TooltipProvider>
     </QueryClientProvider>
-  )
+  );
 }
