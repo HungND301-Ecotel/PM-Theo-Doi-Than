@@ -86,9 +86,7 @@ services:
   reverse-proxy-service:
     image: ${DOCKER_REGISTRY}/pmtdt-reverse-proxy-img:${IMAGE_TAG}
     ports:
-      - "6868:8888" # HTTP plain, only used for debug
-      - "80:80" # HTTP redirect
-      - "443:443" # HTTPS for production
+      - "1188:8888" # HTTP plain, only used for debug
     stdin_open: true
     environment:
       - TZ=Asia/Ho_Chi_Minh
