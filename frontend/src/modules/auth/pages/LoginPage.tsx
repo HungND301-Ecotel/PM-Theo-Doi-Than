@@ -199,7 +199,7 @@ export default function LoginPage() {
                     size='icon-sm'
                     onClick={() => setShowPassword((v) => !v)}
                     className='absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground'
-                    tabIndex={-1}
+                    aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                   >
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </Button>

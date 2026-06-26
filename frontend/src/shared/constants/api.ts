@@ -1,7 +1,15 @@
 // src/shared/constants/api.ts
 
-export const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000';
+const rawBaseUrl = import.meta.env.VITE_API_BASE_URL;
+
+if (!rawBaseUrl && import.meta.env.PROD) {
+  throw new Error(
+    '[Config Error] VITE_API_BASE_URL is not defined. ' +
+      'Set this environment variable before building for production.'
+  );
+}
+
+export const API_BASE_URL = rawBaseUrl ?? 'http://localhost:3000';
 
 export const API_ENDPOINTS = {
   auth: {

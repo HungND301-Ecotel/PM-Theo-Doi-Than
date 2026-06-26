@@ -6,6 +6,11 @@
 import type { BaseEntity } from './common.types';
 import type { ShiftCode, DocStatus } from '../constants/enums';
 
+// ⚠️ TODO: enum `ImportExportMode` (12 mã hình thức N-X đầy đủ) chưa được
+// định nghĩa trong constants/enums.ts do thiếu spec nghiệp vụ từ BE.
+// Các field importMode/issueMode dưới đây hiện tạm dùng `string`.
+// Cần thay bằng `ImportExportMode` khi có đủ spec 12 mã (tracking: #XX).
+
 // ------------------------------------------------------------
 // WarehouseReceipt – Phiếu nhập kho
 // ------------------------------------------------------------
@@ -15,7 +20,7 @@ import type { ShiftCode, DocStatus } from '../constants/enums';
  *   DRAFT → PENDING_KCS → PENDING_TK → PENDING_QD → APPROVED
  *
  * FE lưu ý:
- *  - importMode: 1 trong 12 mã từ ImportExportMode
+ *  - importMode: 1 trong 12 mã từ ImportExportMode (TODO: enum chưa định nghĩa, xem ghi chú đầu file)
  *  - akPercent / wPercent: lấy từ ShiftRecord.akResult / wResult sau chốt ca
  *  - Phiếu được auto-gen khi ShiftRecord chuyển sang DA_CHOT_CA
  */
@@ -27,7 +32,7 @@ export interface WarehouseReceipt extends BaseEntity {
   warehouseName?: string;
   coalTypeId: string;
   coalTypeName?: string;
-  importMode: string; // Mã từ ImportExportMode
+  importMode: string; // TODO: thay bằng ImportExportMode khi có spec BE
   shift: ShiftCode;
   receiptDate: string;
   qty: number; // Khối lượng (tấn)
@@ -43,7 +48,7 @@ export interface WarehouseReceiptRequest {
   importOrderId: string;
   warehouseId: string;
   coalTypeId: string;
-  importMode: string;
+  importMode: string; // TODO: thay bằng ImportExportMode khi có spec BE
   shift: ShiftCode;
   receiptDate: string;
   qty: number;
@@ -64,7 +69,7 @@ export interface WarehouseIssue extends BaseEntity {
   warehouseName?: string;
   coalTypeId: string;
   coalTypeName?: string;
-  issueMode: string; // Mã từ ImportExportMode
+  issueMode: string; // TODO: thay bằng ImportExportMode khi có spec BE
   shift: ShiftCode;
   issueDate: string;
   qty: number;
@@ -82,7 +87,7 @@ export interface WarehouseIssueRequest {
   exportNoticeId: string;
   warehouseId: string;
   coalTypeId: string;
-  issueMode: string;
+  issueMode: string; // TODO: thay bằng ImportExportMode khi có spec BE
   shift: ShiftCode;
   issueDate: string;
   qty: number;

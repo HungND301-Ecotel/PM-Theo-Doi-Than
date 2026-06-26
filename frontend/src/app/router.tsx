@@ -19,8 +19,11 @@ const ReceiptListPage = lazy(() => import('@/pages/ReceiptListPage'));
 // ─── Utils ───────────────────────────────────────────────────────────────────
 function isTokenExpired(token: string): boolean {
   try {
-    const { exp } = JSON.parse(atob(token.split('.')[1]));
-    return Date.now() >= exp * 1000;
+    const payload = token.split('.')[1];
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
+    const { exp } = JSON.parse(atob(padded)) as { exp?: number };
+    return typeof exp !== 'number' || Date.now() >= exp * 1000;
   } catch {
     return true;
   }
@@ -75,7 +78,7 @@ const router = createBrowserRouter([
       {
         path: ROUTES.AUTH.LOGIN,
         element: (
-          <Suspense fallback={<PageLoader />}>
+          <Suspense fallback={<PageLoader fullscreen />}>
             <LoginPage />
           </Suspense>
         ),
@@ -87,7 +90,7 @@ const router = createBrowserRouter([
   {
     path: ROUTES.NOT_FOUND,
     element: (
-      <Suspense fallback={<PageLoader />}>
+      <Suspense fallback={<PageLoader fullscreen />}>
         <NotFoundPage />
       </Suspense>
     ),
