@@ -1,0 +1,26 @@
+<project>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.4.1</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.ecotel</groupId>
+    <artifactId>coal-tracking-system</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+
+    <modules>
+<!--        <module>order-service</module>-->
+<!--        <module>warehouse-transaction-service</module>-->
+<!--        <module>quality-service</module>-->
+<!--        <module>lot-reconciliation-service</module>-->
+<!--        <module>stock-ledger-service</module>-->
+<!--        <module>stocktaking-service</module>-->
+        <module>master-data-service</module>
+<!--        <module>document-attachment-service</module>-->
+<!--        <module>integration-service</module>-->
+<!--        <module>reporting-service</module>-->
+        <module>shared-library</module>
+    </modules>
+</project>
